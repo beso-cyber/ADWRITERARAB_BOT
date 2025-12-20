@@ -74,6 +74,10 @@ async def ask_for_input(msg: Message):
 
 @router.message()
 async def generate(msg: Message):
+    # كلمات خاصة لا تدخل منطق توليد الإعلان
+    if msg.text and msg.text.strip().lower() == "اشتراك":
+        return
+
     # تجاهل رسائل الأزرار
     if msg.text in ["✨ إنشاء إعلان", "📌 رصيدي", "💳 الاشتراك"]:
         return
