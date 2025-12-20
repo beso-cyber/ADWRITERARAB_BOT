@@ -1,6 +1,11 @@
 from aiogram import Router, F
 from aiogram.filters import CommandStart
-from aiogram.types import Message
+from aiogram.types import (
+    Message,
+    InlineKeyboardMarkup,
+    InlineKeyboardButton,
+    CallbackQuery,
+)
 
 from config import FREE_POSTS
 from database import add_user, get_user, update_credits, is_subscriber
@@ -9,7 +14,29 @@ from services.ai_service import generate_ads, ai_ready
 
 router = Router()
 
+# =========================
+# إعدادات الاشتراك (عدّل الرقم فقط)
+# =========================
+WHATSAPP_NUMBER = "962790846237"  # ← غيّر هذا الرقم فقط (بدون +)
+WHATSAPP_TEXT = "مرحبا، أريد الاشتراك في كاتب إعلانات فاير."
 
+def subscription_kb():
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="💳 اشترك الآن", callback_data="sub_now")],
+            [
+                InlineKeyboardButton(
+                    text="📲 تواصل واتساب",
+                    url=f"https://wa.me/{WHATSAPP_NUMBER}?text={WHATSAPP_TEXT.replace(' ', '%20')}",
+                )
+            ],
+        ]
+    )
+
+
+# =========================
+# /start
+# =========================
 @router.message(CommandStart())
 async def start(msg: Message):
     user_id = msg.from_user.id
@@ -31,6 +58,9 @@ async def start(msg: Message):
     )
 
 
+# =========================
+# عرض الرصيد
+# =========================
 @router.message(F.text == "📌 رصيدي")
 async def credits(msg: Message):
     user = get_user(msg.from_user.id)
@@ -48,20 +78,9 @@ async def credits(msg: Message):
     )
 
 
-from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
-
-WHATSAPP_NUMBER = "96279XXXXXXXX"  # ✅ غيّرها لرقمك بصيغة دولية بدون +
-WHATSAPP_TEXT = "مرحبا، أريد الاشتراك في كاتب إعلانات فاير."
-
-def subscription_kb():
-    return InlineKeyboardMarkup(inline_keyboard=[
-        [InlineKeyboardButton(text="💳 اشترك الآن", callback_data="sub_now")],
-        [InlineKeyboardButton(
-            text="📲 تواصل واتساب",
-            url=f"https://wa.me/{WHATSAPP_NUMBER}?text={WHATSAPP_TEXT.replace(' ', '%20')}"
-        )],
-    ])
-
+# =========================
+# الاشتراك (زر + كتابة)
+# =========================
 @router.message((F.text == "💳 الاشتراك") | (F.text.strip().lower() == "اشتراك"))
 async def subscription_entry(msg: Message):
     await msg.answer(
@@ -73,8 +92,11 @@ async def subscription_entry(msg: Message):
         parse_mode="HTML",
         reply_markup=subscription_kb(),
     )
-from aiogram.types import CallbackQuery
 
+
+# =========================
+# زر (اشترك الآن)
+# =========================
 @router.callback_query(F.data == "sub_now")
 async def subscription_instructions(cb: CallbackQuery):
     await cb.message.answer(
@@ -90,7 +112,9 @@ async def subscription_instructions(cb: CallbackQuery):
     await cb.answer()
 
 
-
+# =========================
+# زر إنشاء إعلان
+# =========================
 @router.message(F.text == "✨ إنشاء إعلان")
 async def ask_for_input(msg: Message):
     await msg.answer(
@@ -104,17 +128,19 @@ async def ask_for_input(msg: Message):
     )
 
 
+# =========================
+# Handler عام (توليد الإعلان)
+# ⚠️ يجب أن يكون آخر شيء في الملف
+# =========================
 @router.message()
 async def generate(msg: Message):
-
-    # 🔴 هذا السطر الجديد (مهم جدًا)
+    # منع الاشتراك من الدخول هنا
     if msg.text and msg.text.strip().lower() in ["اشتراك", "💳 الاشتراك"]:
         return
 
-    # تجاهل رسائل الأزرار
+    # تجاهل أزرار القائمة
     if msg.text in ["✨ إنشاء إعلان", "📌 رصيدي", "💳 الاشتراك"]:
         return
-
 
     user_id = msg.from_user.id
     user = get_user(user_id)
@@ -126,7 +152,7 @@ async def generate(msg: Message):
     credits_val = user[1]
     sub = is_subscriber(user_id)
 
-    # إذا انتهى الرصيد
+    # انتهى الرصيد
     if not sub and credits_val <= 0:
         await msg.answer(
             "❌ <b>انتهى رصيدك المجاني</b>\n\n"
@@ -159,21 +185,5 @@ async def generate(msg: Message):
         "• <i>غيّر اللهجة</i>\n"
         "• <i>أضف سعر وCTA</i>\n\n"
         "💡 أو اكتب وصف جديد لإنشاء إعلان آخر.",
-        parse_mode="HTML",
-    )
-
-
-@router.message(F.text.lower() == "اشتراك")
-async def subscription_info(msg: Message):
-    await msg.answer(
-        "💳 <b>طرق الاشتراك في كاتب إعلانات فاير</b>\n\n"
-        "اختر الباقة المناسبة لك:\n"
-        "• 30 إعلان = <b>5$</b>\n"
-        "• اشتراك شهري غير محدود = <b>8$</b>\n\n"
-        "📲 <b>طريقة التفعيل:</b>\n"
-        "حوّل المبلغ عبر:\n"
-        "• زين كاش / Orange Money / تحويل محلي\n\n"
-        "ثم أرسل صورة التحويل هنا.\n"
-        "وسيتم التفعيل خلال دقائق ✅",
         parse_mode="HTML",
     )
