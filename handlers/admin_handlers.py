@@ -110,6 +110,7 @@ async def deduct_credit_start(msg: Message, state: FSMContext):
     if not is_admin(msg):
         return
 
+    await state.clear()
     await state.set_state(AdminStates.deduct_credit)
     await msg.answer(
         "✏️ أرسل البيانات بهذا الشكل:\n\n"
@@ -153,6 +154,7 @@ async def broadcast_start(msg: Message, state: FSMContext):
     if not is_admin(msg):
         return
 
+    await state.clear()
     await state.set_state(AdminStates.broadcast)
     await msg.answer("✉️ أرسل الآن نص الرسالة الجماعية (سيتم الإرسال فورًا).")
 
