@@ -88,7 +88,7 @@ async def generate(msg: Message):
     sub = is_subscriber(user_id)
 
     if not sub and credits_val <= 0:
-    await msg.answer(
+        await msg.answer(
         "❌ <b>انتهى رصيدك المجاني</b>\n\n"
         "🔥 أعجبك مستوى الإعلانات؟\n"
         "يمكنك المتابعة بدون انقطاع عبر الباقات المدفوعة.\n\n"
@@ -98,11 +98,11 @@ async def generate(msg: Message):
         "📩 اكتب <b>اشتراك</b> لمعرفة طريقة التفعيل.",
         parse_mode="HTML",
     )
-    return
+        return
 
 
     # خصم 1 فقط لو ليس مشتركاً
-    if not sub:
+        if not sub:
         update_credits(user_id, credits_val - 1)
 
     await msg.answer("⏳ جاري توليد الإعلان...")
