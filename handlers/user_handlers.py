@@ -48,15 +48,47 @@ async def credits(msg: Message):
     )
 
 
-@router.message(F.text == "💳 الاشتراك")
-async def subs_info(msg: Message):
+from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
+
+WHATSAPP_NUMBER = "96279XXXXXXXX"  # ✅ غيّرها لرقمك بصيغة دولية بدون +
+WHATSAPP_TEXT = "مرحبا، أريد الاشتراك في كاتب إعلانات فاير."
+
+def subscription_kb():
+    return InlineKeyboardMarkup(inline_keyboard=[
+        [InlineKeyboardButton(text="💳 اشترك الآن", callback_data="sub_now")],
+        [InlineKeyboardButton(
+            text="📲 تواصل واتساب",
+            url=f"https://wa.me/{WHATSAPP_NUMBER}?text={WHATSAPP_TEXT.replace(' ', '%20')}"
+        )],
+    ])
+
+@router.message((F.text == "💳 الاشتراك") | (F.text.strip().lower() == "اشتراك"))
+async def subscription_entry(msg: Message):
     await msg.answer(
-        "💳 <b>الاشتراك</b>\n\n"
-        "• يمكنك تفعيل اشتراك شهري (30 يوماً)\n"
-        "• أو شراء رصيد إضافي\n\n"
-        "📩 للتفعيل/الدفع: تواصل مع الإدارة.",
+        "💳 <b>طرق الاشتراك في كاتب إعلانات فاير</b>\n\n"
+        "اختر الباقة المناسبة لك:\n"
+        "• 30 إعلان = <b>5$</b>\n"
+        "• اشتراك شهري غير محدود = <b>8$</b>\n\n"
+        "👇 اختر الطريقة المناسبة:",
+        parse_mode="HTML",
+        reply_markup=subscription_kb(),
+    )
+from aiogram.types import CallbackQuery
+
+@router.callback_query(F.data == "sub_now")
+async def subscription_instructions(cb: CallbackQuery):
+    await cb.message.answer(
+        "✅ <b>خطوات التفعيل (يدويًا)</b>\n\n"
+        "1) اختر الباقة:\n"
+        "• 30 إعلان = <b>5$</b>\n"
+        "• شهري غير محدود = <b>8$</b>\n\n"
+        "2) ادفع عبر (زين كاش / Orange Money / تحويل محلي)\n"
+        "3) أرسل صورة التحويل هنا داخل البوت\n\n"
+        "⚡ سيتم التفعيل خلال دقائق.",
         parse_mode="HTML",
     )
+    await cb.answer()
+
 
 
 @router.message(F.text == "✨ إنشاء إعلان")
@@ -74,13 +106,15 @@ async def ask_for_input(msg: Message):
 
 @router.message()
 async def generate(msg: Message):
-    # كلمات خاصة لا تدخل منطق توليد الإعلان
-    if msg.text and msg.text.strip().lower() == "اشتراك":
+
+    # 🔴 هذا السطر الجديد (مهم جدًا)
+    if msg.text and msg.text.strip().lower() in ["اشتراك", "💳 الاشتراك"]:
         return
 
     # تجاهل رسائل الأزرار
     if msg.text in ["✨ إنشاء إعلان", "📌 رصيدي", "💳 الاشتراك"]:
         return
+
 
     user_id = msg.from_user.id
     user = get_user(user_id)
