@@ -1,19 +1,16 @@
 import asyncio
 import logging
-from aiogram.fsm.context import FSMContext
-from aiogram.fsm.state import State, StatesGroup
-from aiogram.fsm.storage.memory import MemoryStorage
 
 from aiogram import Bot, Dispatcher
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
+from aiogram.fsm.storage.memory import MemoryStorage
 
 from config import BOT_TOKEN
 from database import init_db
 
 from handlers.user_handlers import router as user_router
 from handlers.admin_handlers import router as admin_router
-
 
 logging.basicConfig(
     level=logging.INFO,
@@ -29,7 +26,9 @@ async def main():
         token=BOT_TOKEN,
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
-await bot.delete_webhook(drop_pending_updates=True)
+
+    # حذف أي Webhook قديم لتفادي التعارض مع polling
+    await bot.delete_webhook(drop_pending_updates=True)
 
     dp = Dispatcher(storage=MemoryStorage())
     dp.include_router(admin_router)
