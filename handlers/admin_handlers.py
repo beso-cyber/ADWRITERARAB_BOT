@@ -119,7 +119,7 @@ async def deduct_credit_start(msg: Message, state: FSMContext):
     )
 
 
-@router.message(AdminStates.deduct_credit)
+@router.message(AdminStates.deduct_credit, F.text.regexp(r"^\d+\s+\d+$"))
 async def deduct_credit_apply(msg: Message, state: FSMContext):
     if not is_admin(msg):
         return
@@ -157,7 +157,7 @@ async def broadcast_start(msg: Message, state: FSMContext):
     await msg.answer("✉️ أرسل الآن نص الرسالة الجماعية (سيتم الإرسال فورًا).")
 
 
-@router.message(AdminStates.broadcast)
+@router.message(AdminStates.broadcast, ~F.text.startswith("📢"))
 async def broadcast_apply(msg: Message, state: FSMContext):
     if not is_admin(msg):
         return
