@@ -18,6 +18,7 @@ from keyboards.admin_kb import admin_menu
 from keyboards.user_kb import user_menu
 
 router = Router()
+print("🔥 ADMIN HANDLERS LOADED")
 
 # ================= حالات المدير =================
 class AdminStates(StatesGroup):

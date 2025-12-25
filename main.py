@@ -28,8 +28,14 @@ bot = Bot(
 )
 
 dp = Dispatcher(storage=MemoryStorage())
+
+# 🔥 أعد تحميل routers بالقوة
 dp.include_router(admin_router)
 dp.include_router(user_router)
+
+# طباعة للتأكد أن الكود الجديد يعمل
+print("🔥 ROUTERS RELOADED")
+
 
 
 @app.on_event("startup")
