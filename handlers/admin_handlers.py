@@ -49,6 +49,13 @@ async def admin_panel(msg: Message):
         parse_mode="HTML",
     )
 
+from aiogram.types import ReplyKeyboardRemove
+
+@router.message(Command("reset"))
+async def reset_keyboard(msg: Message):
+    if not is_admin(msg):
+        return
+    await msg.answer("🧹 تم مسح الكيبورد القديمة", reply_markup=ReplyKeyboardRemove())
 
 # ================= رجوع للقائمة =================
 @router.message(F.text == "↩️ رجوع للقائمة الرئيسية")
