@@ -36,19 +36,26 @@ dp.include_router(user_router)
 async def on_startup():
     init_db()
 
-    # حذف أي webhook قديم
     await bot.delete_webhook(drop_pending_updates=True)
 
-    # Render يضع الرابط تلقائيًا
     render_url = os.getenv("RENDER_EXTERNAL_URL")
     webhook_url = f"{render_url}/webhook"
 
-    await bot.set_webhook(webhook_url)
+    await bot.set_webhook(
+        webhook_url,
+        allowed_updates=[
+            "message",
+            "callback_query"
+        ]
+    )
+
     logger.info(f"🚀 Webhook set to: {webhook_url}")
+
 
 
 @app.post("/webhook")
 async def telegram_webhook(request: Request):
-    update = Update.model_validate(await request.json())
+    data = await request.json()
+    update = Update.model_validate(data)
     await dp.feed_update(bot, update)
     return {"ok": True}

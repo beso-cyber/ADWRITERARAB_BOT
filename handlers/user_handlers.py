@@ -99,14 +99,16 @@ async def subscription_entry(msg: Message):
 # =========================
 @router.callback_query(F.data == "sub_now")
 async def subscription_instructions(cb: CallbackQuery):
+    print("🔥 CALLBACK RECEIVED:", cb.data)
 
-    await cb.answer("تم الضغط على زر الاشتراك ✅", show_alert=True)
     await cb.message.answer(
-        "✅ <b>تم الضغط على زر الاشتراك</b>\n\n"
-        "لو شفت هذه الرسالة → الزر شغال 100%.",
-        parse_mode="HTML",
+        "✅ <b>زر الاشتراك يعمل الآن 100%</b>\n\n"
+        "الآن سنربطه لاحقًا بنظام الدفع.",
+        parse_mode="HTML"
     )
-    await cb.answer()
+
+    await cb.answer("تم الاستلام ✅", show_alert=True)
+
 
 
 
