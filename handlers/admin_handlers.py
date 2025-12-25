@@ -10,7 +10,9 @@ from database import (
     get_all_users,
     get_user,
     update_credits,
+    activate_subscription,
 )
+
 
 from keyboards.admin_kb import admin_menu
 from keyboards.user_kb import user_menu
@@ -22,6 +24,8 @@ class AdminStates(StatesGroup):
     add_credit = State()
     deduct_credit = State()
     broadcast = State()
+    activate_sub = State()   # ← جديد
+
 
 
 def is_admin(msg: Message) -> bool:
@@ -179,4 +183,37 @@ async def broadcast_apply(msg: Message, state: FSMContext):
         f"📤 تم الإرسال إلى: {success}\n"
         f"❌ فشل الإرسال إلى: {failed}"
     )
+    await state.clear()
+
+# ================= تفعيل اشتراك =================
+@router.message(F.text == "⭐ تفعيل اشتراك")
+async def activate_sub_start(msg: Message, state: FSMContext):
+    if not is_admin(msg):
+        return
+
+    await state.clear()
+    await state.set_state(AdminStates.activate_sub)
+    await msg.answer(
+        "✏️ أرسل USER_ID لتفعيل الاشتراك لمدة 30 يوم:\n\n"
+        "<code>123456789</code>",
+        parse_mode="HTML",
+    )
+
+
+@router.message(AdminStates.activate_sub, F.text.regexp(r"^\d+$"))
+async def activate_sub_apply(msg: Message, state: FSMContext):
+    if not is_admin(msg):
+        return
+
+    user_id = int(msg.text.strip())
+    activate_subscription(user_id, days=30)
+
+    await msg.bot.send_message(
+        user_id,
+        "🎉 <b>تم تفعيل اشتراكك لمدة 30 يوم!</b>\n\n"
+        "استمتع الآن بجميع الميزات بدون قيود 🚀",
+        parse_mode="HTML",
+    )
+
+    await msg.answer(f"✅ تم تفعيل الاشتراك للمستخدم {user_id}")
     await state.clear()
