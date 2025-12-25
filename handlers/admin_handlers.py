@@ -3,7 +3,7 @@ from aiogram.filters import Command
 from aiogram.types import Message
 from aiogram.fsm.context import FSMContext
 from aiogram.fsm.state import State, StatesGroup
-
+from aiogram.types import ReplyKeyboardRemove
 from config import ADMIN_ID
 from database import (
     get_users_count,
@@ -39,6 +39,10 @@ async def admin_panel(msg: Message):
         await msg.answer("❌ هذا الأمر مخصص للمدير فقط.")
         return
 
+    # 🔥 امسح الكيبورد القديمة أولاً
+    await msg.answer("🔄 تحديث لوحة التحكم...", reply_markup=ReplyKeyboardRemove())
+
+    # ثم أرسل الكيبورد الجديدة
     await msg.answer(
         "👑 <b>لوحة تحكم المدير</b>\n\nاختر إجراء:",
         reply_markup=admin_menu(),
