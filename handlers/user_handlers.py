@@ -63,19 +63,23 @@ async def start(msg: Message):
 # =========================
 @router.message(F.text == "📌 رصيدي")
 async def credits(msg: Message):
-    user = get_user(msg.from_user.id)
+    user_id = msg.from_user.id
+    user = get_user(user_id)
+
     if not user:
-        add_user(msg.from_user.id, FREE_POSTS)
-        user = get_user(msg.from_user.id)
+        add_user(user_id, FREE_POSTS)
+        user = get_user(user_id)
 
     credits_val = user[1]
-    sub = is_subscriber(msg.from_user.id)
+    sub = is_subscriber(user_id)
 
     await msg.answer(
         f"📌 <b>رصيدك الحالي:</b> {credits_val} إعلان\n"
         f"💳 <b>الاشتراك الشهري:</b> {'✅ فعّال' if sub else '❌ غير فعّال'}",
         parse_mode="HTML",
     )
+
+
 
 
 # =========================
