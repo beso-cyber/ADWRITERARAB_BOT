@@ -75,8 +75,17 @@ def is_subscriber(user_id: int) -> bool:
     if sub != 1 or not expire:
         return False
 
-    expire_date = datetime.fromisoformat(expire)
+    try:
+        expire_date = datetime.fromisoformat(expire)
+    except Exception:
+        # دعم الصيغة القديمة YYYY-MM-DD
+        try:
+            expire_date = datetime.strptime(expire, "%Y-%m-%d")
+        except Exception:
+            return False
+
     return datetime.now() <= expire_date
+
 
 
 
