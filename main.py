@@ -45,15 +45,15 @@ async def on_startup():
     await bot.delete_webhook(drop_pending_updates=True)
 
     render_url = os.getenv("RENDER_EXTERNAL_URL")
+    if not render_url:
+        raise RuntimeError("RENDER_EXTERNAL_URL not set")
+
     webhook_url = f"{render_url}/webhook"
 
-    await bot.set_webhook(
-        webhook_url,
-        allowed_updates=[
-            "message",
-            "callback_query"
-        ]
-    )
+
+
+    await bot.set_webhook(webhook_url)
+
 
     logger.info(f"🚀 Webhook set to: {webhook_url}")
 
