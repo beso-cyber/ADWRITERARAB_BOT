@@ -11,6 +11,7 @@ from config import FREE_POSTS
 from database import add_user, get_user, update_credits, is_subscriber
 from keyboards.user_kb import user_menu
 from services.ai_service import generate_ads, ai_ready
+from config import ADMIN_ID
 
 router = Router()
 
@@ -164,16 +165,15 @@ async def generate(msg: Message):
     # انتهى الرصيد
     if not sub and credits_val <= 0:
         await msg.answer(
-            "❌ <b>انتهى رصيدك المجاني</b>\n\n"
-            "🔥 أعجبك مستوى الإعلانات؟\n"
-            "يمكنك المتابعة بدون انقطاع عبر الباقات المدفوعة.\n\n"
-            "💳 <b>الباقات المتاحة:</b>\n"
+            "🚫 <b>انتهت الإعلانات المجانية</b>\n\n"
+            "لكن لا تقلق… الآن بدأت النتائج تظهر 🔥\n\n"
+            "💡 اشترك اليوم واستمر بدون قيود:\n"
             "• 30 إعلان = <b>5$</b>\n"
-            "• اشتراك شهري غير محدود = <b>8$</b>\n\n"
-            "📩 اكتب <b>اشتراك</b> لمعرفة طريقة التفعيل.",
-            parse_mode="HTML",
-        )
-        return
+            "• شهري غير محدود = <b>8$</b>\n\n"
+            "👇 اكتب <b>اشتراك</b> أو اضغط الزر بالأسفل",
+            parse_mode="HTML"
+)
+
 
     # خصم إعلان واحد إذا لم يكن مشتركًا
     if not sub:
@@ -195,4 +195,17 @@ async def generate(msg: Message):
         "• <i>أضف سعر وCTA</i>\n\n"
         "💡 أو اكتب وصف جديد لإنشاء إعلان آخر.",
         parse_mode="HTML",
+    )
+@router.message(F.photo)
+async def payment_proof(msg: Message):
+    await msg.answer(
+        "✅ تم استلام صورة التحويل بنجاح.\n"
+        "سيتم مراجعتها وتفعيل الاشتراك خلال دقائق ⏳"
+    )
+
+    # إرسال الصورة للأدمن
+    await msg.bot.send_photo(
+        ADMIN_ID,
+        photo=msg.photo[-1].file_id,
+        caption=f"💳 طلب اشتراك جديد\n\nUSER_ID: {msg.from_user.id}"
     )
